@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать комнату</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* Космический фон */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #ffffff;
+            border-radius: 50%;
+            animation: twinkle linear infinite;
+            box-shadow: 0 0 3px #ffffff;
+        }
+
+        .star.big {
+            width: 3px;
+            height: 3px;
+            box-shadow: 0 0 6px #ffffff;
+        }
+
+        .star.medium {
+            width: 2px;
+            height: 2px;
+            box-shadow: 0 0 4px #ffffff;
+        }
+
+        .star.small {
+            width: 1px;
+            height: 1px;
+            box-shadow: 0 0 2px #ffffff;
+        }
+
+        @keyframes twinkle {
+            0% {
+                opacity: 0;
+                transform: translateY(-100px);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh);
+            }
+        }
+
+        /* Стреляющие звезды */
+        .shooting-star {
+            position: absolute;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, #ffffff, transparent);
+            animation: shoot 3s linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes shoot {
+            0% {
+                transform: translateX(0) translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-500px) translateY(500px);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 50px 40px;
+            max-width: 550px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8),
+                        0 0 40px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .icon-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .icon-header-emoji {
+            font-size: 80px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 36px;
+            color: #000000;
+            animation: fadeIn 0.5s ease-out 0.2s backwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 16px;
+            animation: fadeIn 0.5s ease-out 0.3s backwards;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            animation: fadeIn 0.5s ease-out 0.4s backwards;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2d2d2d;
+            font-size: 15px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            opacity: 0.5;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 18px 20px 18px 50px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #000000;
+            background: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="text"]::placeholder {
+            color: #999;
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .hint {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: #666;
+            border-left: 3px solid #000000;
+            animation: fadeIn 0.5s ease-out 0.5s backwards;
+        }
+
+        .hint strong {
+            color: #000000;
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.5s ease-out 0.6s backwards;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: #666;
+            text-decoration: none;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-out 0.7s backwards;
+        }
+
+        .back-link:hover {
+            color: #000000;
+            text-decoration: underline;
+        }
+
+        .home-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 25px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .icon-header-emoji {
+                font-size: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+
+    <a href="{% url 'index' %}" class="home-btn">← На главную</a>
+
+    <div class="container">
+        <div class="icon-header">
+            <span class="icon-header-emoji">✨</span>
+        </div>
+
+        <h1>Создать комнату</h1>
+        <p class="subtitle">Создайте новое пространство для общения</p>
+
+        <form method="post" id="createRoomForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="name">Название комнаты:</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">💬</span>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        required 
+                        autofocus
+                        placeholder="Например: Общий чат"
+                        maxlength="50"
+                    >
+                </div>
+                <div class="char-counter">
+                    <span id="charCount">0</span>/50 символов
+                </div>
+            </div>
+
+            <div class="hint">
+                💡 <strong>Совет:</strong> Используйте понятное название, чтобы другие пользователи могли легко найти вашу комнату.
+            </div>
+
+            <button type="submit" id="submitBtn">
+                🚀 Создать комнату
+            </button>
+        </form>
+
+        <a href="{% url 'chat_rooms' %}" class="back-link">← Вернуться к списку комнат</a>
+    </div>
+
+    <script>
+        // Создание звезд
+        const starsContainer = document.getElementById('stars');
+        const numberOfStars = 150;
+
+        for (let i = 0; i < numberOfStars; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            
+            const sizes = ['small', 'medium', 'big'];
+            const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
+            star.classList.add(randomSize);
+            
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * -100 + '%';
+            
+            const duration = 10 + Math.random() * 20;
+            star.style.animationDuration = duration + 's';
+            star.style.animationDelay = Math.random() * 10 + 's';
+            
+            starsContainer.appendChild(star);
+        }
+
+        // Создание стреляющих звезд
+        function createShootingStar() {
+            const shootingStar = document.createElement('div');
+            shootingStar.className = 'shooting-star';
+            
+            shootingStar.style.left = Math.random() * 100 + '%';
+            shootingStar.style.top = Math.random() * 50 + '%';
+            
+            starsContainer.appendChild(shootingStar);
+            
+            setTimeout(() => {
+                shootingStar.remove();
+            }, 3000);
+        }
+
+        setInterval(createShootingStar, 4000 + Math.random() * 4000);
+
+        // Параллакс эффект
+        document.addEventListener('mousemove', (e) => {
+            const moveX = (e.clientX - window.innerWidth / 2) * 0.005;
+            const moveY = (e.clientY - window.innerHeight / 2) * 0.005;
+            
+            starsContainer.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        });
+
+        // Счетчик символов
+        const nameInput = document.getElementById('name');
+        const charCount = document.getElementById('charCount');
+        const submitBtn = document.getElementById('submitBtn');
+
+        nameInput.addEventListener('input', function() {
+            const length = this.value.length;
+            charCount.textContent = length;
+            
+            // Валидация
+            if (length < 3) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = '❌ Минимум 3 символа';
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 Создать комнату';
+            }
+        });
+
+        // Обработка отправки формы
+        const form = document.getElementById('createRoomForm');
+        
+        form.addEventListener('submit', function(e) {
+            const name = nameInput.value.trim();
+            
+            if (name.length < 3) {
+                e.preventDefault();
+                alert('Название должно содержать минимум 3 символа');
+                nameInput.focus();
+                return false;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Создание...';
+        });
+
+        // Автофокус и предотвращение пробелов в начале
+        nameInput.addEventListener('keydown', function(e) {
+            if (e.key === ' ' && this.value.length === 0) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

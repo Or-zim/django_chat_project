@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ room.name }} - Чат</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Космический фон */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #ffffff;
+            border-radius: 50%;
+            animation: twinkle linear infinite;
+            box-shadow: 0 0 3px #ffffff;
+        }
+
+        .star.big {
+            width: 3px;
+            height: 3px;
+            box-shadow: 0 0 6px #ffffff;
+        }
+
+        .star.medium {
+            width: 2px;
+            height: 2px;
+            box-shadow: 0 0 4px #ffffff;
+        }
+
+        .star.small {
+            width: 1px;
+            height: 1px;
+            box-shadow: 0 0 2px #ffffff;
+        }
+
+        @keyframes twinkle {
+            0% {
+                opacity: 0;
+                transform: translateY(-100px);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh);
+            }
+        }
+
+        /* Стреляющие звезды */
+        .shooting-star {
+            position: absolute;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, #ffffff, transparent);
+            animation: shoot 3s linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes shoot {
+            0% {
+                transform: translateX(0) translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-500px) translateY(500px);
+                opacity: 0;
+            }
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Шапка чата */
+        .chat-header {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            color: #ffffff;
+            padding: 20px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .chat-header-icon {
+            font-size: 32px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .chat-header h2 {
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .chat-header-subtitle {
+            font-size: 14px;
+            opacity: 0.6;
+            margin-top: 5px;
+        }
+
+        .back-btn {
+            padding: 10px 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Область сообщений */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 70%;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.own {
+            align-self: flex-end;
+        }
+
+        .message.other {
+            align-self: flex-start;
+        }
+
+        .message-bubble {
+            padding: 15px 20px;
+            border-radius: 20px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message.own .message-bubble {
+            background: #ffffff;
+            color: #000000;
+            border-bottom-right-radius: 5px;
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .message.other .message-bubble {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            color: #ffffff;
+            border-bottom-left-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .message-username {
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 5px;
+            opacity: 0.8;
+        }
+
+        .message.own .message-username {
+            color: #000000;
+        }
+
+        .message.other .message-username {
+            color: #ffffff;
+        }
+
+        .message-text {
+            line-height: 1.5;
+            font-size: 15px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        /* Индикатор печати */
+        .typing-indicator {
+            padding: 15px 30px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            font-style: italic;
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        .typing-dots {
+            display: inline-flex;
+            gap: 4px;
+            margin-left: 5px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            animation: typingDot 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingDot {
+            0%, 60%, 100% {
+                opacity: 0.3;
+                transform: translateY(0);
+            }
+            30% {
+                opacity: 1;
+                transform: translateY(-8px);
+            }
+        }
+
+        /* Поле ввода */
+        .input-container {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 25px 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 15px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        #message-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border-radius: 25px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        #message-input:focus {
+            outline: none;
+            border-color: #ffffff;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        #message-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        #send-btn {
+            padding: 15px 35px;
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #send-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        #send-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        #send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        #send-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Скроллбар */
+        .messages-container::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Статус подключения */
+        .connection-status {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 1000;
+            display: none;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .connection-status.connecting {
+            background: rgba(255, 165, 0, 0.2);
+            border: 2px solid rgba(255, 165, 0, 0.5);
+            color: #FFA500;
+            display: block;
+        }
+
+        .connection-status.connected {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid rgba(0, 255, 0, 0.5);
+            color: #00FF00;
+            display: block;
+        }
+
+        .connection-status.disconnected {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid rgba(255, 0, 0, 0.5);
+            color: #FF0000;
+            display: block;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .chat-header {
+                padding: 15px 20px;
+            }
+
+            .chat-header h2 {
+                font-size: 18px;
+            }
+
+            .messages-container {
+                padding: 20px 15px;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+
+            .input-container {
+                padding: 15px;
+                flex-direction: column;
+            }
+
+            #send-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+
+    <!-- Статус подключения -->
+    <div class="connection-status" id="connectionStatus">
+        <span id="statusText">Подключение...</span>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <span class="chat-header-icon">💬</span>
+                <div>
+                    <h2>{{ room.name }}</h2>
+                    <div class="chat-header-subtitle">
+                        {{ room.messages.count }} сообщений
+                    </div>
+                </div>
+            </div>
+            <a href="{% url 'chat_rooms' %}" class="back-btn">← Назад</a>
+        </div>
+
+        <div class="messages-container" id="messages">
+            <!-- Сообщения будут добавляться здесь через JavaScript -->
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            Кто-то печатает
+            <span class="typing-dots">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+            </span>
+        </div>
+
+        <div class="input-container">
+            <input 
+                type="text" 
+                id="message-input" 
+                placeholder="Введите сообщение..."
+                autocomplete="off"
+                maxlength="1000"
+            >
+            <button id="send-btn">Отправить 🚀</button>
+        </div>
+    </div>
+
+    <script>
+        // Создание звезд
+        const starsContainer = document.getElementById('stars');
+        const numberOfStars = 150;
+
+        for (let i = 0; i < numberOfStars; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            
+            const sizes = ['small', 'medium', 'big'];
+            const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
+            star.classList.add(randomSize);
+            
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * -100 + '%';
+            
+            const duration = 10 + Math.random() * 20;
+            star.style.animationDuration = duration + 's';
+            star.style.animationDelay = Math.random() * 10 + 's';
+            
+            starsContainer.appendChild(star);
+        }
+
+        // Создание стреляющих звезд
+        function createShootingStar() {
+            const shootingStar = document.createElement('div');
+            shootingStar.className = 'shooting-star';
+            
+            shootingStar.style.left = Math.random() * 100 + '%';
+            shootingStar.style.top = Math.random() * 50 + '%';
+            
+            starsContainer.appendChild(shootingStar);
+            
+            setTimeout(() => {
+                shootingStar.remove();
+            }, 3000);
+        }
+
+        setInterval(createShootingStar, 4000 + Math.random() * 4000);
+
+        // Параллакс эффект
+        document.addEventListener('mousemove', (e) => {
+            const moveX = (e.clientX - window.innerWidth / 2) * 0.005;
+            const moveY = (e.clientY - window.innerHeight / 2) * 0.005;
+            
+            starsContainer.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        });
+
+        // ============================================
+        // WebSocket логика
+        // ============================================
+
+        const roomSlug = '{{ room.slug }}';
+        
+        // ✅ ИСПРАВЛЕНО: Теперь две переменные
+        const currentUserEmail = '{{ user.username }}';  // Email для сравнения
+        const currentUserDisplayName = '{{ user.display_name }}';  // Имя для отображения (если нужно)
+        
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = protocol + '//' + window.location.host + '/ws/chat/' + roomSlug + '/';
+
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const statusText = document.getElementById('statusText');
+
+        let chatSocket;
+        let reconnectInterval;
+
+        // Подключение к WebSocket
+        function connect() {
+            updateStatus('connecting', 'Подключение...');
+            
+            chatSocket = new WebSocket(wsUrl);
+
+            chatSocket.onopen = function(e) {
+                console.log('WebSocket connected');
+                updateStatus('connected', '✓ Подключено');
+                setTimeout(() => {
+                    connectionStatus.style.display = 'none';
+                }, 2000);
+                clearInterval(reconnectInterval);
+            };
+
+            // ✅ ИСПРАВЛЕНО: Обработка входящих сообщений
+            chatSocket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                
+                if (data.type === 'message_history') {
+                    data.messages.forEach(msg => {
+                        addMessage(msg.display_name, msg.user_email, msg.message, msg.timestamp, false);
+                    });
+                } else if (data.type === 'chat_message') {
+                    addMessage(data.display_name, data.user_email, data.message, data.timestamp, true);
+                }
+                
+                scrollToBottom();
+            };
+
+            chatSocket.onclose = function(e) {
+                console.log('WebSocket closed');
+                updateStatus('disconnected', '✗ Отключено');
+                
+                // Попытка переподключения
+                reconnectInterval = setInterval(() => {
+                    console.log('Attempting to reconnect...');
+                    connect();
+                }, 5000);
+            };
+
+            chatSocket.onerror = function(e) {
+                console.error('WebSocket error:', e);
+                updateStatus('disconnected', '✗ Ошибка подключения');
+            };
+        }
+
+        // Обновление статуса подключения
+        function updateStatus(status, text) {
+            connectionStatus.className = 'connection-status ' + status;
+            statusText.textContent = text;
+        }
+
+        // ✅ ИСПРАВЛЕНО: Отправка сообщения (без username)
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            
+            if (message && chatSocket.readyState === WebSocket.OPEN) {
+                chatSocket.send(JSON.stringify({
+                    'message': message
+                    // ❌ Больше НЕ отправляем username - сервер сам знает кто мы
+                }));
+                messageInput.value = '';
+                messageInput.focus();
+            } else if (chatSocket.readyState !== WebSocket.OPEN) {
+                alert('Подключение потеряно. Попытка переподключения...');
+            }
+        }
+
+        // События кнопки отправки
+        sendBtn.onclick = sendMessage;
+
+        messageInput.onkeypress = function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        };
+
+        // ✅ ИСПРАВЛЕНО: Добавление сообщения в DOM
+        function addMessage(displayName, userEmail, text, time, animate = true) {
+            const messageDiv = document.createElement('div');
+            // Сравниваем по email, чтобы определить "свое" сообщение
+            messageDiv.className = userEmail === currentUserEmail ? 'message own' : 'message other';
+            
+            if (!animate) {
+                messageDiv.style.animation = 'none';
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="message-bubble">
+                    <div class="message-username">${escapeHtml(displayName)}</div>
+                    <div class="message-text">${escapeHtml(text)}</div>
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+        }
+
+        // Прокрутка вниз
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Экранирование HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Автофокус на input
+        messageInput.focus();
+
+        // Инициализация подключения
+        connect();
+
+        // Уведомление при закрытии страницы
+        window.addEventListener('beforeunload', function(e) {
+            if (chatSocket) {
+                chatSocket.close();
+            }
+        });
+    </script>

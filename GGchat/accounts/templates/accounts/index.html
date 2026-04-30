@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная страница</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            background: #000000;
+            min-height: 100vh;
+        }
+
+        /* Космический фон */
+        .space-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            z-index: 0;
+        }
+
+        /* Контейнер для звезд */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #ffffff;
+            border-radius: 50%;
+            animation: twinkle linear infinite;
+            box-shadow: 0 0 3px #ffffff;
+        }
+
+        @keyframes twinkle {
+            0% {
+                opacity: 0;
+                transform: translateY(-100px);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh);
+            }
+        }
+
+        .star.big {
+            width: 3px;
+            height: 3px;
+            box-shadow: 0 0 6px #ffffff;
+        }
+
+        .star.medium {
+            width: 2px;
+            height: 2px;
+            box-shadow: 0 0 4px #ffffff;
+        }
+
+        .star.small {
+            width: 1px;
+            height: 1px;
+            box-shadow: 0 0 2px #ffffff;
+        }
+
+        /* Стреляющие звезды */
+        .shooting-star {
+            position: absolute;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, #ffffff, transparent);
+            border-radius: 50%;
+            animation: shoot 3s linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes shoot {
+            0% {
+                transform: translateX(0) translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-500px) translateY(500px);
+                opacity: 0;
+            }
+        }
+
+        /* Навигационная панель */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            text-decoration: none;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.5),
+                             0 0 20px rgba(255, 255, 255, 0.3);
+            }
+            50% {
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
+                             0 0 30px rgba(255, 255, 255, 0.5);
+            }
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 10px 25px;
+            border: 2px solid #ffffff;
+            background: transparent;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: #ffffff;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+            z-index: -1;
+        }
+
+        .nav-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .nav-btn:hover {
+            color: #000000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-btn.primary {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .nav-btn.primary::before {
+            background: #000000;
+        }
+
+        .nav-btn.primary:hover {
+            color: #ffffff;
+        }
+
+        .nav-btn.logout {
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+
+        .nav-btn.logout::before {
+            background: #ff4444;
+        }
+
+        .nav-btn.logout:hover {
+            color: #ffffff;
+        }
+
+        /* Основной контент */
+        .page-container {
+            position: relative;
+            z-index: 100;
+            padding-top: 100px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Центральный контент */
+        .main-content {
+            text-align: center;
+            padding: 60px 20px;
+            animation: fadeInScale 1s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .welcome-text {
+            color: #ffffff;
+            font-size: 24px;
+            margin-bottom: 20px;
+            opacity: 0.9;
+            animation: fadeIn 1s ease-out 0.3s backwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .username-display {
+            font-size: 72px;
+            font-weight: 700;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            margin-bottom: 30px;
+            animation: fadeInUp 1s ease-out 0.5s backwards, float 3s ease-in-out 1.5s infinite;
+            text-shadow: 
+                0 0 10px rgba(255, 255, 255, 0.5),
+                0 0 20px rgba(255, 255, 255, 0.3),
+                0 0 30px rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .guest-message {
+            font-size: 48px;
+            color: #ffffff;
+            font-weight: 300;
+            animation: fadeInUp 1s ease-out 0.5s backwards;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .guest-message span {
+            font-weight: 700;
+            display: block;
+            font-size: 64px;
+            margin-top: 20px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        .cta-buttons {
+            margin-top: 40px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            animation: fadeIn 1s ease-out 0.8s backwards;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn {
+            padding: 15px 40px;
+            border: 3px solid #ffffff;
+            background: transparent;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            display: inline-block;
+        }
+
+        .cta-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            transition: left 0.5s ease;
+            z-index: -1;
+        }
+
+        .cta-btn:hover::before {
+            left: 0;
+        }
+
+        .cta-btn:hover {
+            color: #000000;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .cta-btn.primary {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .cta-btn.primary::before {
+            background: #000000;
+        }
+
+        .cta-btn.primary:hover {
+            color: #ffffff;
+        }
+
+        /* Секция комнат чата */
+        .chat-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            animation: fadeIn 1s ease-out 1s backwards;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 42px;
+            color: #ffffff;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .create-room-banner {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .create-room-banner:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .create-room-banner h3 {
+            color: #ffffff;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .create-room-banner p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 20px;
+        }
+
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .room-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            text-decoration: none;
+            color: #000000;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .room-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .room-card:hover::before {
+            left: 100%;
+        }
+
+        .room-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(255, 255, 255, 0.2);
+        }
+
+        .room-icon {
+            font-size: 42px;
+            margin-bottom: 15px;
+            display: block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .room-card h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .room-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .view-all-btn {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .empty-state-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .empty-state p {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        /* Орбитальное кольцо */
+        .orbital-ring {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: rotate 60s linear infinite;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .orbital-ring::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ffffff;
+        }
+
+        @keyframes rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Информация о пользователе */
+        .user-info {
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 16px;
+            animation: fadeIn 1s ease-out 1s backwards;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .username-display {
+                font-size: 36px;
+                letter-spacing: 4px;
+            }
+
+            .guest-message {
+                font-size: 28px;
+            }
+
+            .guest-message span {
+                font-size: 36px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .orbital-ring {
+                width: 300px;
+                height: 300px;
+            }
+
+            .nav-btn {
+                font-size: 12px;
+                padding: 8px 20px;
+            }
+
+            .section-title {
+                font-size: 32px;
+            }
+
+            .rooms-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Космический фон -->
+    <div class="space-background"></div>
+    <div class="stars" id="stars"></div>
+
+    <!-- Навигационная панель -->
+    <nav class="navbar">
+        <a href="/" class="logo">SPACE</a>
+        <div class="nav-buttons">
+            {% if user.is_authenticated %}
+                <a href="{% url 'chat_rooms' %}" class="nav-btn">💬 Чат</a>
+                <form method="post" action="{% url 'logout' %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-btn logout">Выйти</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="nav-btn">Войти</a>
+                <a href="{% url 'register' %}" class="nav-btn primary">Регистрация</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Орбитальное кольцо -->
+    <div class="orbital-ring"></div>
+
+    <div class="page-container">
+        <!-- Центральный контент -->
+        <div class="main-content">
+            {% if user.is_authenticated %}
+                <div class="welcome-text">Добро пожаловать,</div>
+                <h1 class="username-display" data-text="{{ user.username }}">
+                    {{ user.username }}
+                </h1>
+                <div class="user-info">
+                    Вы успешно вошли в систему
+                </div>
+            {% else %}
+                <div class="guest-message">
+                    Добро пожаловать в
+                    <span>КОСМОС</span>
+                </div>
+                <div class="cta-buttons">
+                    <a href="{% url 'register' %}" class="cta-btn primary">Начать путешествие</a>
+                    <a href="{% url 'login' %}" class="cta-btn">Войти</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Секция чат-комнат -->
+        {% if user.is_authenticated %}
+        <div class="chat-section">
+            <div class="section-header">
+                <h2 class="section-title">💬 Чат-комнаты</h2>
+                <p class="section-subtitle">Присоединяйтесь к беседе или создайте свою комнату</p>
+            </div>
+
+            <!-- Баннер создания комнаты -->
+            <div class="create-room-banner">
+                <h3>✨ Создайте свою комнату</h3>
+                <p>Начните новую беседу и пригласите друзей</p>
+                <a href="{% url 'create_room' %}" class="cta-btn primary">Создать комнату</a>
+            </div>
+
+            <!-- Сетка комнат -->
+            {% if rooms %}
+                <div class="rooms-grid">
+                    {% for room in rooms %}
+                        <a href="{% url 'chat_room' room.slug %}" class="room-card">
+                            <span class="room-icon">💬</span>
+                            <h3>{{ room.name }}</h3>
+                            <div class="room-meta">
+                                <span>📝 {{ room.messages.count }} сообщений</span>
+                                <span>{{ room.created_at|date:"d.m.Y" }}</span>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+
+                <!-- Кнопка просмотра всех комнат -->
+                <div class="view-all-btn">
+                    <a href="{% url 'chat_rooms' %}" class="cta-btn">Посмотреть все комнаты →</a>
+                </div>
+            {% else %}
+                <!-- Пустое состояние -->
+                <div class="empty-state">
+                    <div class="empty-state-icon">🌙</div>
+                    <p>Пока нет комнат для общения</p>
+                    <a href="{% url 'create_room' %}" class="cta-btn primary">Создать первую комнату</a>
+                </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Создание звезд
+        const starsContainer = document.getElementById('stars');
+        const numberOfStars = 200;
+
+        for (let i = 0; i < numberOfStars; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            
+            // Случайный размер звезды
+            const sizes = ['small', 'medium', 'big'];
+            const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
+            star.classList.add(randomSize);
+            
+            // Случайная позиция
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * -100 + '%';
+            
+            // Случайная длительность анимации
+            const duration = 10 + Math.random() * 20;
+            star.style.animationDuration = duration + 's';
+            
+            // Случайная задержка
+            star.style.animationDelay = Math.random() * 10 + 's';
+            
+            starsContainer.appendChild(star);
+        }
+
+        // Создание стреляющих звезд
+        function createShootingStar() {
+            const shootingStar = document.createElement('div');
+            shootingStar.className = 'shooting-star';
+            
+            shootingStar.style.left = Math.random() * 100 + '%';
+            shootingStar.style.top = Math.random() * 50 + '%';
+            
+            starsContainer.appendChild(shootingStar);
+            
+            setTimeout(() => {
+                shootingStar.remove();
+            }, 3000);
+        }
+
+        // Создавать стреляющую звезду каждые 3-7 секунд
+        setInterval(createShootingStar, 3000 + Math.random() * 4000);
+
+        // Добавление эффекта движения мыши
+        document.addEventListener('mousemove', (e) => {
+            const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
+            const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
+            
+            starsContainer.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        });
+
+        // Анимация появления букв username
+        {% if user.is_authenticated %}
+        const username = document.querySelector('.username-display');
+        if (username) {
+            const text = username.textContent;
+            username.textContent = '';
+            
+            let i = 0;
+            const typingInterval = setInterval(() => {
+                if (i < text.length) {
+                    username.textContent += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(typingInterval);
+                }
+            }, 100);
+        }
+        {% endif %}
+    </script>
+</body>
+</html>
